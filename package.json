@@ -10,15 +10,23 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mui/material": "^7.1.0",
     "@solana/web3.js": "^1.98.0",
-    "axios": "^1.8.4",
+    "axios": "^1.9.0",
     "buffer": "^6.0.3",
+    "cors": "^2.8.5",
     "ethers": "^6.13.5",
+    "express": "^5.1.0",
     "framer-motion": "^12.7.4",
     "html2canvas": "^1.4.1",
+    "idb": "^8.0.3",
     "jspdf": "^2.5.1",
     "jspdf-autotable": "^5.0.2",
     "lodash": "^4.17.21",
+    "lru-cache": "^11.1.0",
+    "p-limit": "^6.2.0",
     "papaparse": "^5.5.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -43,3 +51,4 @@
     "vite-plugin-node-polyfills": "^0.23.0"
   }
 }
+
