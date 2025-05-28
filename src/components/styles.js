@@ -20,7 +20,7 @@ export const Header = styled.header`
   gap: 20px;
 
   @media (max-width: 768px) {
-    flex-direction: column;
+    flex-direction: row;
     gap: 10px;
   }
 `;
@@ -311,9 +311,9 @@ export const VibeSelectorWrapper = styled.div`
   justify-content: center;
 
   @media (max-width: 768px) {
-    flex-direction: row; /* Keep on the same line */
+    flex-direction: row;
     gap: 8px; /* Slightly smaller gap for mobile */
-    flex-wrap: wrap; /* Allow wrapping if needed */
+    flex-wrap: wrap; 
   }
 `;
 
@@ -450,4 +450,104 @@ export const PopupButton = styled.button.withConfig({
     padding: 8px 16px;
     font-size: 14px;
   }
+`;
+
+
+// HODL STYLE
+export const TabContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-bottom: 15px;
+
+  @media (max-width: 768px) {
+    margin-bottom: 10px;
+  }
+`;
+
+export const Tab = styled.button.withConfig({
+  shouldForwardProp: (prop) => !["colors", "active"].includes(prop),
+})`
+  background-color: ${({ active, colors }) => (active ? colors.accent : colors.cardBackground)};
+  color: ${({ active, colors }) => (active ? colors.background : colors.textPrimary)};
+  border: 1px solid ${({ colors }) => colors.accent};
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s, color 0.3s;
+  &:hover {
+    background-color: ${({ colors }) => colors.accentHover};
+    color: ${({ colors }) => colors.background};
+  }
+  &:not(:last-child) {
+    margin-right: 10px;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+`;
+
+export const SummaryCard = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== "colors",
+})`
+  background-color: ${({ colors }) => colors.cardBackground};
+  border-radius: 8px;
+  padding: 15px;
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+
+  @media (max-width: 768px) {
+    padding: 10px;
+    max-width: 100%;
+  }
+`;
+
+export const TimelineContainer = styled.div`
+  margin-top: 15px;
+  width: 100%;
+  max-width: 250px;
+  height: 20px;
+  position: relative;
+  margin-left: auto;
+  margin-right: auto;
+`;
+
+export const TimelineBar = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== "colors",
+})`
+  background-color: ${({ colors }) => colors.textSecondary};
+  height: 2px;
+  width: 100%;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+`;
+
+export const TimelineMarker = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== "colors",
+})`
+  background-color: ${({ colors }) => colors.accent};
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  left: ${({ position }) => position}%;
+`;
+
+export const TimelineLabel = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== "colors",
+})`
+  color: ${({ colors }) => colors.textPrimary};
+  font-size: 10px;
+  position: absolute;
+  top: -15px;
+  left: ${({ position }) => position}%;
+  transform: translateX(-50%);
 `;
