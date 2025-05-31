@@ -121,6 +121,25 @@ const ContactWrapper = styled.div`
   gap: 20px;
   margin-top: 20px;
 `;
+const Disclaimer = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+  margin-bottom: -20px;
+`;
+
+const DisclaimerChild = styled.p.withConfig({
+  shouldForwardProp: (prop) => !["colors"].includes(prop),
+})`
+  color: ${(props) => props.colors?.textSecondary || "#666"};
+  font-size: 1rem;
+  line-height: 1.6;
+  font-style: italic;
+
+  @media (max-width: 768px) {
+    font-size: 0.9rem;
+  }
+`;
 
 const ContactLink = styled.a.withConfig({
   shouldForwardProp: (prop) => !["colors"].includes(prop),
@@ -165,9 +184,9 @@ const About = ({ isOpen, onClose }) => {
             </CloseButton>
             <Title colors={safeColors}>Welcome to the Vibe Vault</Title>
             <Section>
-              <Subtitle colors={safeColors}>What is Blockchain Explorer Lite?</Subtitle>
+              <Subtitle colors={safeColors}>What is Flex Lite?</Subtitle>
               <Text colors={safeColors}>
-                Blockchain Explorer Lite is your go-to Web3 tool for diving into the pulse of blockchain addresses with style and swagger! We bring culture, fun, and flair to wallet analytics, turning raw data into vibrant insights. Whether you’re a crypto kingpin or a small-time hustler, our platform celebrates your journey with metrics that vibe with your roots.
+                Flex Lite is a Blockchain Explorer Lite, which is your go-to Web3 tool for diving into the pulse of blockchain addresses with style and swagger! We bring culture, fun, and flair to wallet analytics, turning raw data into vibrant insights. Whether you’re a crypto kingpin or a small-time hustler, our platform celebrates your journey with metrics that vibe with your roots.
               </Text>
             </Section>
             <Section>
@@ -237,6 +256,12 @@ const About = ({ isOpen, onClose }) => {
                   <FaEnvelope />
                 </ContactLink>
               </ContactWrapper>
+               <Disclaimer >
+                <DisclaimerChild colors={safeColors}>
+                  Disclaimer - This tool is provided by Quba Web3 Agency for educational and research purposes only.
+                  It reads publicly available blockchain data and does not store, modify, or interact with user funds. 
+                  Always verify results with an official explorer.</DisclaimerChild>
+                </Disclaimer>
             </Section>
           </ModalContent>
         </ModalOverlay>
