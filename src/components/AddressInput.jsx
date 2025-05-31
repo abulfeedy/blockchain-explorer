@@ -278,7 +278,7 @@ const AddressInput = ({
           const summaryUrl = `${apiBase}/api?module=account&action=tokenbalance&contractaddress=${contractAddress}&address=${address}&tag=latest&apikey=${apiKey}`;
           const summaryResponse = await retry(() => axios.get(summaryUrl, { timeout: 10000 }));
           if (summaryResponse.data.status !== "1") {
-            throw new Error("Failed to fetch summary data from Etherscan/BSCscan API.");
+            throw new Error("Failed to fetch summary data.");
           }
 
           let page = 1;
@@ -310,10 +310,10 @@ const AddressInput = ({
                 totalTransactions = 0;
                 break;
               } else {
-                throw new Error(response.data.result || "Etherscan/BSCscan API error.");
+                throw new Error(response.data.result || "please check if the address is correct.");
               }
             } else if (!Array.isArray(response.data.result)) {
-              throw new Error("Invalid transaction data from Etherscan/BSCscan API.");
+             throw new Error("Invalid transaction data."); 
             }
 
             const txs = response.data.result;
@@ -428,10 +428,10 @@ const AddressInput = ({
                 totalTransactions = 0;
                 break;
               } else {
-                throw new Error(response.data.result || "Etherscan/BSCscan API error.");
+                throw new Error(response.data.result || "please check if the address is correct.");
               }
             } else if (!Array.isArray(response.data.result)) {
-              throw new Error("Invalid transaction data from Etherscan/BSCscan API.");
+              throw new Error("Invalid transaction data.");
             }
 
             const txs = response.data.result;
