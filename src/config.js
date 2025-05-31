@@ -1,1 +1,1 @@
-export const APP_NAME = "Blockchain Explorer Lite";
+export const APP_NAME = "Flex Lite";
