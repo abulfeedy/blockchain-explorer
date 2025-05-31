@@ -40,7 +40,6 @@ const HodlTracker = ({ chain, address, summary, vibeStyle, colors, setHodlData }
   const BTC_APIS = [
     "https://mempool.space/api",
     "https://blockstream.info/api",
-    "https://chain.so/api/v2",
   ];
 
   // Check for API keys
@@ -232,7 +231,7 @@ const HodlTracker = ({ chain, address, summary, vibeStyle, colors, setHodlData }
           } else if (data.result === "Max rate limit reached") {
             throw new Error(`${chain.toUpperCase()} API rate limit exceeded`);
           } else {
-            throw new Error(`Unexpected ${chain.toUpperCase()} API response: ${data.message || "Unknown error"}`);
+            throw new Error(`Unexpected response: ${data.message || "Unknown error"}`);
           }
         }
         const txs = data?.result || [];
@@ -280,7 +279,7 @@ const HodlTracker = ({ chain, address, summary, vibeStyle, colors, setHodlData }
       const currentBalance = parseFloat(summary.currentBalance) || 0;
       const currentValue = parseFloat(summary.usdtEquivalent.replace(/,/g, "")) || 0;
       const valueThen = currentBalance * historicalPrice;
-      const appreciation = currentValue && valueThen > 0 ? (currentValue / valueThen).toFixed(1) : "N/A";
+      const appreciation = currentValue && valueThen > 0 ? (currentValue / valueThen).toFixed(2) : "N/A";
       const duration = new Date().getFullYear() - earliestDate.getFullYear();
       const hodlScore = duration * Math.log10(parseFloat(appreciation) || 1);
      const scaledScore = Math.min(Math.round(hodlScore * 10), 100);
