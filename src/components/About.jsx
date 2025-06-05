@@ -258,7 +258,8 @@ const About = ({ isOpen, onClose }) => {
               </ContactWrapper>
                <Disclaimer >
                 <DisclaimerChild colors={safeColors}>
-                  Disclaimer - This tool is provided by Quba Web3 Agency for educational and research purposes only.
+                  Disclaimer - This tool is provided by <a href="https://qubaagency.com" target="blank" 
+                  className="underline italic">Quba Web3 Agency</a> for educational and research purposes only.
                   It reads publicly available blockchain data and does not store, modify, or interact with user funds. 
                   Always verify results with an official explorer.</DisclaimerChild>
                 </Disclaimer>
