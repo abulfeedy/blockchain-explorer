@@ -298,6 +298,12 @@ export const Footer = styled.footer.withConfig({
     margin: 5px 0;
   }
 
+  h4, a {
+    margin: 5px 0;
+    font-style: italic;
+    color: ${(props) => props.colors.textSecondary};
+  }
+
   @media (max-width: 768px) {
     font-size: 12px;
   }
