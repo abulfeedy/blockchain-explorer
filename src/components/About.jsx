@@ -139,6 +139,10 @@ const DisclaimerChild = styled.p.withConfig({
   @media (max-width: 768px) {
     font-size: 0.9rem;
   }
+
+   a {
+    color: ${(props) => props.colors.textSecondary};
+    }
 `;
 
 const ContactLink = styled.a.withConfig({
