@@ -634,7 +634,8 @@ function AppContent() {
       </ContentWrapper>
       <About isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
       <Footer colors={colors}>
-        <h4>This tool is provided by Quba Web3 Agency for educational and research purposes only... </h4>
+        <h4>This tool is provided by <a href="https://qubaagency.com" target="blank" 
+           className="underline italic">Quba Web3 Agency</a> for educational and research purposes only... </h4>
         <p>© 2025 {APP_NAME}. All right reserved.</p>
       </Footer>
     </AppContainer>
