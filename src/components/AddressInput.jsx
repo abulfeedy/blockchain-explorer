@@ -94,9 +94,10 @@ const AddressInput = ({
     import.meta.env.VITE_ETHERSCAN_API_KEY_3,
   ].filter(Boolean);
   const bscscanApiKeys = [
-    import.meta.env.VITE_BSCADA_API_KEY_1,
-    import.meta.env.VITE_BSCADA_API_KEY_2,
-    import.meta.env.VITE_BSCADA_API_KEY_3,
+  import.meta.env.VITE_ETHERSCAN_API_KEY_1,
+  import.meta.env.VITE_ETHERSCAN_API_KEY_2,
+  import.meta.env.VITE_ETHERSCAN_API_KEY_3,
+  
   ].filter(Boolean);
 
   useEffect(() => {
@@ -218,142 +219,147 @@ const AddressInput = ({
         }
 
         if (selectedChain.value === "usdt-eth" || selectedChain.value === "usdt-bnb") {
-          const contractAddress =
-            selectedChain.value === "usdt-eth"
-              ? "0xdAC17F958D2ee523a2206206994597C13D831ec7"
-              : "0x55d398326f99059fF775485246999027B3197955";
+  const contractAddress =
+    selectedChain.value === "usdt-eth"
+      ? "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+      : "0x55d398326f99059fF775485246999027B3197955";
 
-          const network =
-            selectedChain.value === "usdt-eth"
-              ? { name: "mainnet", chainId: 1 }
-              : { name: "binance", chainId: 56 };
+  const network =
+    selectedChain.value === "usdt-eth"
+      ? { name: "mainnet", chainId: 1 }
+      : { name: "binance", chainId: 56 };
 
-          let provider = new ethers.JsonRpcProvider(config.rpc, network, {
-            pollingInterval: 1000,
-            timeout: 10000,
-          });
+  let provider = new ethers.JsonRpcProvider(config.rpc, network, {
+    pollingInterval: 1000,
+    timeout: 10000,
+  });
 
-          const usdtAbi = [
-            "function balanceOf(address) view returns (uint256)",
-            "event Transfer(address indexed from, address indexed to, uint256 value)",
-          ];
-          let usdtContract = new ethers.Contract(contractAddress, usdtAbi, provider);
+  const usdtAbi = [
+    "function balanceOf(address) view returns (uint256)",
+    "event Transfer(address indexed from, address indexed to, uint256 value)",
+  ];
+  let usdtContract = new ethers.Contract(contractAddress, usdtAbi, provider);
 
-          const balance = await retry(
-            async (rpc = config.rpc) => {
-              if (rpc !== config.rpc) {
-                provider = new ethers.JsonRpcProvider(rpc, network, {
-                  pollingInterval: 1000,
-                  timeout: 10000,
-                });
-                usdtContract = new ethers.Contract(contractAddress, usdtAbi, provider);
-              }
-              return usdtContract.balanceOf(address);
-            },
-            3,
-            1000,
-            config.fallbackApis
-          );
-          currentBalance = parseFloat(ethers.formatUnits(balance, config.decimals));
+  const balance = await retry(
+    async (rpc = config.rpc) => {
+      if (rpc !== config.rpc) {
+        provider = new ethers.JsonRpcProvider(rpc, network, {
+          pollingInterval: 1000,
+          timeout: 10000,
+        });
+        usdtContract = new ethers.Contract(contractAddress, usdtAbi, provider);
+      }
+      return usdtContract.balanceOf(address);
+    },
+    3,
+    1000,
+    config.fallbackApis
+  );
+  currentBalance = parseFloat(ethers.formatUnits(balance, config.decimals));
 
-          if (currentBalance > config.maxBalance) {
-            throw new Error(`Unrealistic ${config.symbol} balance detected. Please verify the address.`);
-          }
+  if (currentBalance > config.maxBalance) {
+    throw new Error(`Unrealistic ${config.symbol} balance detected. Please verify the address.`);
+  }
 
-          const apiBase = selectedChain.value === "usdt-eth" ? "https://api.etherscan.io" : "https://api.bscscan.com";
-          const { key: apiKey, nextIndex } =
-            selectedChain.value === "usdt-eth"
-              ? getNextApiKey(etherscanApiKeys, etherscanKeyIndex)
-              : getNextApiKey(bscscanApiKeys, bscscanKeyIndex);
-          if (selectedChain.value === "usdt-eth") {
-            setEtherscanKeyIndex(nextIndex);
-          } else {
-            setBscscanKeyIndex(nextIndex);
-          }
+  const apiBase = "https://api.etherscan.io/v2/api";
+  const { key: apiKey, nextIndex } =
+    selectedChain.value === "usdt-eth"
+      ? getNextApiKey(etherscanApiKeys, etherscanKeyIndex)
+      : getNextApiKey(bscscanApiKeys, bscscanKeyIndex);
+  if (selectedChain.value === "usdt-eth") {
+    setEtherscanKeyIndex(nextIndex);
+  } else {
+    setBscscanKeyIndex(nextIndex);
+  }
 
-          if (!apiKey) {
-            throw new Error("Missing API key for transaction fetching.");
-          }
+  if (!apiKey) {
+    throw new Error("Missing API key for transaction fetching.");
+  }
 
-          const summaryUrl = `${apiBase}/api?module=account&action=tokenbalance&contractaddress=${contractAddress}&address=${address}&tag=latest&apikey=${apiKey}`;
-          const summaryResponse = await retry(() => axios.get(summaryUrl, { timeout: 10000 }));
-          if (summaryResponse.data.status !== "1") {
-            throw new Error("Failed to fetch summary data.");
-          }
+  const summaryUrl = selectedChain.value === "usdt-eth"
+    ? `${apiBase}?chainid=1&module=account&action=tokenbalance&contractaddress=${contractAddress}&address=${address}&tag=latest&apikey=${apiKey}`
+    : `${apiBase}?chainid=56&module=account&action=tokenbalance&contractaddress=${contractAddress}&address=${address}&tag=latest&apikey=${apiKey}`;
+  const summaryResponse = await retry(() => axios.get(summaryUrl, { timeout: 10000 }));
+  if (summaryResponse.data.status !== "1") {
+    throw new Error("Failed to fetch summary data.");
+  }
 
-          let page = 1;
-          const pageSize = 1000;
-          totalAmount = 0;
-          totalAmountTraded = 0;
-          totalTransactions = 0;
+  let page = 1;
+  const pageSize = 1000;
+  totalAmount = 0;
+  totalAmountTraded = 0;
+  totalTransactions = 0;
 
-          while (true) {
-            const { key: nextApiKey, nextIndex: newIndex } =
-              selectedChain.value === "usdt-eth"
-                ? getNextApiKey(etherscanApiKeys, etherscanKeyIndex)
-                : getNextApiKey(bscscanApiKeys, bscscanKeyIndex);
-            if (selectedChain.value === "usdt-eth") {
-              setEtherscanKeyIndex(newIndex);
-            } else {
-              setBscscanKeyIndex(newIndex);
-            }
+  while (true) {
+    const { key: nextApiKey, nextIndex } =
+      selectedChain.value === "usdt-eth"
+        ? getNextApiKey(etherscanApiKeys, etherscanKeyIndex)
+        : getNextApiKey(bscscanApiKeys, bscscanKeyIndex);
+    if (selectedChain.value === "usdt-eth") {
+      setEtherscanKeyIndex(nextIndex);
+    } else {
+      setBscscanKeyIndex(nextIndex);
+    }
 
-            const url = `${apiBase}/api?module=account&action=tokentx&contractaddress=${contractAddress}&address=${address}&startblock=0&endblock=99999999&sort=asc&page=${page}&offset=${pageSize}&apikey=${nextApiKey}`;
-            const response = await retry(() => axios.get(url, { timeout: 10000 }));
+    const url = selectedChain.value === "usdt-eth"
+      ? `${apiBase}?chainid=1&module=account&action=tokentx&contractaddress=${contractAddress}&address=${address}&startblock=0&endblock=99999999&sort=asc&page=${page}&offset=${pageSize}&apikey=${nextApiKey}`
+      : `${apiBase}?chainid=56&module=account&action=tokentx&contractaddress=${contractAddress}&address=${address}&startblock=0&endblock=99999999&sort=asc&page=${page}&offset=${pageSize}&apikey=${nextApiKey}`;
+    const response = await retry(() => axios.get(url, { timeout: 10000 }));
+    console.log("API Response (USDT):", response.data); // Debug log
 
-            if (!response.data || typeof response.data !== "object") {
-              throw new Error("Invalid response from Etherscan/BSCscan API.");
-            }
+    if (!response.data || typeof response.data !== "object") {
+      throw new Error("Invalid response from Etherscan API.");
+    }
 
-            if (response.data.status === "0") {
-              if (response.data.message === "No transactions found") {
-                totalTransactions = 0;
-                break;
-              } else {
-                throw new Error(response.data.result || "please check if the address is correct.");
-              }
-            } else if (!Array.isArray(response.data.result)) {
-             throw new Error("Invalid transaction data."); 
-            }
+    if (response.data.status === "0") {
+      if (response.data.message === "No transactions found") {
+        totalTransactions = 0;
+        break;
+      } else {
+        throw new Error(response.data.result || "please check if the address is correct.");
+      }
+    } else if (!Array.isArray(response.data.result)) {
+      throw new Error("Invalid transaction data.");
+    }
 
-            const txs = response.data.result;
-            totalTransactions += txs.length;
+    const txs = response.data.result;
+    totalTransactions += txs.length;
 
-            txs.forEach((tx) => {
-              const value = parseFloat(tx.value) / Math.pow(10, config.decimals);
-              if (tx.from.toLowerCase() === address.toLowerCase()) {
-                totalAmount += value;
-              }
-              totalAmountTraded += value;
-            });
+    txs.forEach((tx) => {
+      const value = parseFloat(tx.value) / Math.pow(10, config.decimals);
+      if (tx.from.toLowerCase() === address.toLowerCase()) {
+        totalAmount += value;
+      }
+      totalAmountTraded += value;
+    });
 
-            allTxs = allTxs.concat(txs);
+    allTxs = allTxs.concat(txs);
 
-            if (txs.length < pageSize) {
-              break;
-            }
-            page++;
-            await delay(200);
-          }
+    if (txs.length < pageSize) {
+      break;
+    }
+    page++;
+    await delay(200);
+  }
 
-          txData = allTxs.slice(0, 100).map((tx) => {
-            const value = parseFloat(tx.value) / Math.pow(10, config.decimals);
-            return {
-              hash: tx.hash,
-              from: tx.from,
-              to: tx.to || "N/A",
-              value: value.toFixed(4),
-              time: new Date(parseInt(tx.timeStamp) * 1000).toLocaleString(),
-              gas: (parseInt(tx.gasUsed) * parseInt(tx.gasPrice) / 1e18).toFixed(4),
-              confirmations: tx.confirmations || null,
-              blockHeight: tx.blockNumber,
-              status: parseInt(tx.isError) === 0 ? "Success" : "Failed",
-            };
-          });
+  txData = allTxs.slice(0, 100).map((tx) => {
+    const value = parseFloat(tx.value) / Math.pow(10, config.decimals);
+    return {
+      hash: tx.hash,
+      from: tx.from,
+      to: tx.to || "N/A",
+      value: value.toFixed(4),
+      time: new Date(parseInt(tx.timeStamp) * 1000).toLocaleString(),
+      gas: (parseInt(tx.gasUsed) * parseInt(tx.gasPrice) / 1e18).toFixed(4),
+      confirmations: tx.confirmations || null,
+      blockHeight: tx.blockNumber,
+      status: parseInt(tx.isError) === 0 ? "Success" : "Failed",
+    };
+  });
 
-          usdtEquivalent = currentBalance;
-          totalAmountTradedUSD = totalAmountTraded;
-        } else if (selectedChain.value === "eth" || selectedChain.value === "bnb") {
+  usdtEquivalent = currentBalance;
+  totalAmountTradedUSD = totalAmountTraded;
+}  else if (selectedChain.value === "eth" || selectedChain.value === "bnb") {
           const network =
             selectedChain.value === "eth"
               ? { name: "mainnet", chainId: 1 }
@@ -384,7 +390,7 @@ const AddressInput = ({
             throw new Error(`Unrealistic ${config.symbol} balance detected. Please verify the address.`);
           }
 
-          const apiBase = selectedChain.value === "eth" ? "https://api.etherscan.io" : "https://api.bscscan.com";
+        const apiBase = "https://api.etherscan.io/v2/api"; 
           const { key: apiKey, nextIndex } =
             selectedChain.value === "eth"
               ? getNextApiKey(etherscanApiKeys, etherscanKeyIndex)
@@ -416,8 +422,10 @@ const AddressInput = ({
               setBscscanKeyIndex(newIndex);
             }
 
-            const url = `${apiBase}/api?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&sort=asc&page=${page}&offset=${pageSize}&apikey=${nextApiKey}`;
-            const response = await retry(() => axios.get(url, { timeout: 10000 }));
+             const url = selectedChain.value === "eth"
+    ? `${apiBase}?chainid=1&module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&sort=asc&page=${page}&offset=${pageSize}&apikey=${nextApiKey}`
+    : `${apiBase}?chainid=56&module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&sort=asc&page=${page}&offset=${pageSize}&apikey=${nextApiKey}`;
+  const response = await retry(() => axios.get(url, { timeout: 10000 }));
 
             if (!response.data || typeof response.data !== "object") {
               throw new Error("Invalid response from Etherscan/BSCscan API.");
