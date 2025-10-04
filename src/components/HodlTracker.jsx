@@ -25,9 +25,9 @@ const HodlTracker = ({ chain, address, summary, vibeStyle, colors, setHodlData }
     // import.meta.env.VITE_ETHERSCAN_API_KEYD,
   ].filter(Boolean);
   const BSCSCAN_API_KEYS = [
-    import.meta.env.VITE_BSCSCAN_API_KEYA,
-    import.meta.env.VITE_BSCSCAN_API_KEYB,
-    import.meta.env.VITE_BSCSCAN_API_KEYC,
+    import.meta.env.VITE_ETHERSCAN_API_KEYA,
+    import.meta.env.VITE_ETHERSCAN_API_KEYB,
+    import.meta.env.VITE_ETHERSCAN_API_KEYC,
     // import.meta.env.VITE_BSCSCAN_API_KEYD,
   ].filter(Boolean);
   const CRYPTOCOMPARE_API_KEYS = [
@@ -53,10 +53,10 @@ const HodlTracker = ({ chain, address, summary, vibeStyle, colors, setHodlData }
   }
 
   const chainApis = {
-    btc: `${BTC_APIS[0]}/address/${address}/txs`,
-    eth: `https://api.etherscan.io/api?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&sort=asc&apikey=${ETHERSCAN_API_KEYS[0]}`,
-    bnb: `https://api.bscscan.com/api?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&sort=asc&apikey=${BSCSCAN_API_KEYS[0]}`,
-  };
+  btc: `${BTC_APIS[0]}/address/${address}/txs`,
+  eth: `https://api.etherscan.io/v2/api?chainid=1&module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&sort=asc&apikey=${ETHERSCAN_API_KEYS[0]}`,
+  bnb: `https://api.etherscan.io/v2/api?chainid=56&module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&sort=asc&apikey=${BSCSCAN_API_KEYS[0]}`,
+};
 
   const isValidAddress = (chain, address) => {
     if (chain === "btc") {
@@ -125,64 +125,127 @@ const HodlTracker = ({ chain, address, summary, vibeStyle, colors, setHodlData }
     }
   };
 
+  // const fetchWithRetry = async (url, retries = 3, delayMs = 1000) => {
+  //   let apiKeys = [];
+  //   let apis = [url];
+  //   let baseUrl = url;
+
+  //   if (chain === "eth") {
+  //     apiKeys = ETHERSCAN_API_KEYS;
+  //     baseUrl = `https://api.etherscan.io/v2/api?chainid=1&module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&sort=asc&apikey=`;
+  //     apis = apiKeys.map(key => `${baseUrl}${key}`);
+  //   } else if (chain === "bnb") {
+  //     apiKeys = BSCSCAN_API_KEYS; 
+  //   baseUrl = `https://api.etherscan.io/v2/api?chainid=56&module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&sort=asc&apikey=`;
+  //   apis = apiKeys.map(key => `${baseUrl}${key}`);
+  //   } else if (chain === "btc") {
+  //     apis = BTC_APIS.map(api => `${api}/address/${address}/txs`);
+  //   }
+
+  //   let cycleCount = 0;
+  //   while (cycleCount < 2) {
+  //     for (let i = 0; i < apis.length; i++) {
+  //       for (let attempt = 0; attempt < retries; attempt++) {
+  //         try {
+  //           if (!navigator.onLine) {
+  //             throw new Error("No internet connection, please check your network");
+  //           }
+  //           console.log(`Fetching from ${apis[i]}, attempt ${attempt + 1}`);
+  //           const response = await fetch(apis[i]);
+  //           if (!response.ok) {
+  //             if (response.status === 429) {
+  //               console.warn(`Rate limit hit for API ${i + 1}, trying next API`);
+  //               break; // Move to next API
+  //             }
+  //             throw new Error(`Chain API error: ${response.statusText}`);
+  //           }
+  //           return await response.json();
+  //         } catch (err) {
+  //           console.warn(`Fetch attempt ${attempt + 1} failed for API ${i + 1}: ${err.message}`);
+  //           if (err.message.includes("No internet connection")) {
+  //             throw err; // Immediately throw network errors
+  //           }
+  //           if (err.message.includes('429')) {
+  //             break; // Move to next API
+  //           }
+  //           if (attempt < retries - 1) {
+  //             await new Promise(resolve => setTimeout(resolve, delayMs * Math.pow(2, attempt)));
+  //           } else if (i === apis.length - 1) {
+  //             console.warn(`All APIs failed in cycle ${cycleCount + 1}, retrying from first API after delay`);
+  //             cycleCount++;
+  //             await new Promise(resolve => setTimeout(resolve, 5000)); // 5-second delay before next cycle
+  //           }
+  //         }
+  //       }
+  //     }
+  //     if (cycleCount >= 2) {
+  //       throw new Error("System busy, please try again later");
+  //     }
+  //   }
+  // };
+
   const fetchWithRetry = async (url, retries = 3, delayMs = 1000) => {
-    let apiKeys = [];
-    let apis = [url];
-    let baseUrl = url;
+  let apiKeys = [];
+  let apis = [url];
+  let baseUrl = url;
 
-    if (chain === "eth") {
-      apiKeys = ETHERSCAN_API_KEYS;
-      baseUrl = `https://api.etherscan.io/api?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&sort=asc&apikey=`;
-      apis = apiKeys.map(key => `${baseUrl}${key}`);
-    } else if (chain === "bnb") {
-      apiKeys = BSCSCAN_API_KEYS;
-      baseUrl = `https://api.bscscan.com/api?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&sort=asc&apikey=`;
-      apis = apiKeys.map(key => `${baseUrl}${key}`);
-    } else if (chain === "btc") {
-      apis = BTC_APIS.map(api => `${api}/address/${address}/txs`);
-    }
+  if (chain === "eth") {
+    apiKeys = ETHERSCAN_API_KEYS;
+    baseUrl = `https://api.etherscan.io/v2/api?chainid=1&module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&sort=asc&apikey=`;
+    apis = apiKeys.map(key => `${baseUrl}${key}`);
+  } else if (chain === "bnb") {
+    apiKeys = BSCSCAN_API_KEYS; // Now uses Etherscan keys
+    baseUrl = `https://api.etherscan.io/v2/api?chainid=56&module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&sort=asc&apikey=`;
+    apis = apiKeys.map(key => `${baseUrl}${key}`);
+  } else if (chain === "btc") {
+    apis = BTC_APIS.map(api => `${api}/address/${address}/txs`);
+  }
 
-    let cycleCount = 0;
-    while (cycleCount < 2) {
-      for (let i = 0; i < apis.length; i++) {
-        for (let attempt = 0; attempt < retries; attempt++) {
-          try {
-            if (!navigator.onLine) {
-              throw new Error("No internet connection, please check your network");
-            }
-            console.log(`Fetching from ${apis[i]}, attempt ${attempt + 1}`);
-            const response = await fetch(apis[i]);
-            if (!response.ok) {
-              if (response.status === 429) {
-                console.warn(`Rate limit hit for API ${i + 1}, trying next API`);
-                break; // Move to next API
-              }
-              throw new Error(`Chain API error: ${response.statusText}`);
-            }
-            return await response.json();
-          } catch (err) {
-            console.warn(`Fetch attempt ${attempt + 1} failed for API ${i + 1}: ${err.message}`);
-            if (err.message.includes("No internet connection")) {
-              throw err; // Immediately throw network errors
-            }
-            if (err.message.includes('429')) {
+  let cycleCount = 0;
+  while (cycleCount < 2) {
+    for (let i = 0; i < apis.length; i++) {
+      for (let attempt = 0; attempt < retries; attempt++) {
+        try {
+          if (!navigator.onLine) {
+            throw new Error("No internet connection, please check your network");
+          }
+          console.log(`Fetching from ${apis[i]}, attempt ${attempt + 1}`);
+          const response = await fetch(apis[i]);
+          if (!response.ok) {
+            if (response.status === 429) {
+              console.warn(`Rate limit hit for API ${i + 1}, trying next API`);
               break; // Move to next API
             }
-            if (attempt < retries - 1) {
-              await new Promise(resolve => setTimeout(resolve, delayMs * Math.pow(2, attempt)));
-            } else if (i === apis.length - 1) {
-              console.warn(`All APIs failed in cycle ${cycleCount + 1}, retrying from first API after delay`);
-              cycleCount++;
-              await new Promise(resolve => setTimeout(resolve, 5000)); // 5-second delay before next cycle
-            }
+            throw new Error(`Chain API error: ${response.statusText}`);
+          }
+          const data = await response.json();
+          if (chain !== "btc" && data.status === "0") {
+            throw new Error(`Unexpected response: ${data.message || "Unknown error"}`);
+          }
+          return data;
+        } catch (err) {
+          console.warn(`Fetch attempt ${attempt + 1} failed for API ${i + 1}: ${err.message}`);
+          if (err.message.includes("No internet connection")) {
+            throw err; // Immediately throw network errors
+          }
+          if (err.message.includes("429")) {
+            break; // Move to next API
+          }
+          if (attempt < retries - 1) {
+            await new Promise(resolve => setTimeout(resolve, delayMs * Math.pow(2, attempt)));
+          } else if (i === apis.length - 1) {
+            console.warn(`All APIs failed in cycle ${cycleCount + 1}, retrying from first API after delay`);
+            cycleCount++;
+            await new Promise(resolve => setTimeout(resolve, 5000)); // 5-second delay
           }
         }
       }
-      if (cycleCount >= 2) {
-        throw new Error("System busy, please try again later");
-      }
     }
-  };
+    if (cycleCount >= 2) {
+      throw new Error("System busy, please try again later");
+    }
+  }
+};
 
   const fetchHodlData = async () => {
     if (!supportedChains.includes(chain) || !address || !summary) return;
